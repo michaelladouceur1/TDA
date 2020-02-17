@@ -85,11 +85,11 @@ def get_movers(index,direction,change):
 
     return res
 
-# data = get_recent_data('QQQ','year',3,'daily',1)
-# data = timestamp_to_iso(data)
-# # print(data)
-# data = sma(data,30,'close')
-# data = sma(data,15,'close')
+data = get_recent_data('QQQ','year',10,'daily',1)
+data = timestamp_to_iso(data)
 # print(data)
-# print(f'{sys.getsizeof(data)/1000} KB')
-# candle(data,'sma_15','sma_30')
+data = sma(data,45,'close')
+data = sma(data,15,'close')
+print(data)
+print(f'{sys.getsizeof(data)/1000} KB')
+candle(data,'sma_15','sma_45')

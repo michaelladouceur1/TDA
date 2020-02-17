@@ -11,7 +11,7 @@ cerebro.broker.set_cash(100000)
 
 print(f'Starting Portfolio Value: ${cerebro.broker.getvalue()}')
 
-res = get_recent_data('MSFT','year',3,'daily',1)
+res = get_recent_data('QQQ','year',5,'daily',1)
 res = timestamp_to_iso(res)
 # res = sma(res,30,'close')
 # res = sma(res,15,'close')
@@ -24,6 +24,6 @@ cerebro.addstrategy(MyStrategy)
 
 cerebro.run()
 
-cerebro.plot()
+cerebro.plot(iplot=False)
 
 print(f'Final Portfolio Value: ${cerebro.broker.getvalue()}')
