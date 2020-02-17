@@ -1,15 +1,12 @@
 import pandas as pd
 
-def sma(data,window,param=None,win_type=None):
-	if param == None:
-		df = pd.DataFrame(data)
-	else:
-		df = pd.Series()
-		s = 0
-		for i in data:
-			df.set_value(s,i[param])
-			s += 1
-	
-	sma = df.rolling(window,win_type).mean()
+def convert_to_df(data,index=None):
+	return pd.DataFrame(data,index=index)
 
-	return sma
+def timestamp_to_iso(data):
+	data['datetime'] = data['datetime'].apply(lambda x: pd.Timestamp(x, unit='ms'))
+	return data
+
+def sma(data,window,param,win_type=None):
+	data[f'sma_{window}'] = data[param].rolling(window,win_type).mean()
+	return data
