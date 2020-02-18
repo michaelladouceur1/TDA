@@ -85,16 +85,16 @@ def get_movers(index,direction,change):
 
     return res
 
-period1 = 15
-period2 = 60
+# period1 = 15
+# period2 = 60
 
-data = get_recent_data('QQQ','year',2,'daily',1)
-data = timestamp_to_iso(data)
-# print(data)
-data = sma(data,period2,'close')
-data = sma(data,period1,'close')
-data = crossover(data,f'sma_{period1}',f'sma_{period2}')
-with pd.option_context('display.max_rows', None):
-    print(data)
-print(f'{sys.getsizeof(data)/1000} KB')
-candle(data,f'sma_{period1}',f'sma_{period2}',bsh=True)
+# data = get_recent_data('QQQ','year',2,'daily',1)
+# data = timestamp_to_iso(data)
+# # print(data)
+# data = sma(data,period2,'close')
+# data = sma(data,period1,'close')
+# data = crossover(data,f'sma_{period1}',f'sma_{period2}')
+# with pd.option_context('display.max_rows', None):
+#     print(data)
+# print(f'{sys.getsizeof(data)/1000} KB')
+# candle(data,f'sma_{period1}',f'sma_{period2}',bsh=True)

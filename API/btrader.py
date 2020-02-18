@@ -1,9 +1,9 @@
-from utils import *
-from tdapi import *
+from utils import timestamp_to_iso
+from tdapi import get_recent_data
 from btstrategies import *
 import backtrader as bt 
-import backtrader.feeds as btfeeds
 import datetime
+import pandas as pd
 
 cerebro = bt.Cerebro()
 
@@ -13,16 +13,22 @@ cerebro.broker.set_cash(c_init)
 
 print(f'Starting Portfolio Value: ${cerebro.broker.getvalue()}')
 
-res = get_recent_data('MSFT','year',5,'daily',1)
-res = timestamp_to_iso(res)
-# res = sma(res,30,'close')
-# res = sma(res,15,'close')
-# print(res)
-data = bt.feeds.PandasData(dataname=res, datetime=-1)
+res1 = get_recent_data('SPY','year',5,'daily',1)
+res1 = timestamp_to_iso(res1)
+res2 = get_recent_data('FNV','year',1,'daily',1)
+res2 = timestamp_to_iso(res2)
 
-cerebro.adddata(data)
+data1 = bt.feeds.PandasData(dataname=res1, datetime=-1)
+cerebro.adddata(data1,name='data1')
 
-cerebro.addstrategy(TestStrategy)
+# data2 = bt.feeds.PandasData(dataname=res2, datetime=-1)
+# data2.plotinfo.plotmaster = data1
+# cerebro.adddata(data2,name='data2')
+
+# cerebro.addstrategy(BuyAndHold)
+cerebro.addstrategy(OverUnder)
+
+# cerebro.addsizer(bt.sizers.FixedSize)
 
 cerebro.run()
 
