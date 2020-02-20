@@ -24,3 +24,20 @@ def crossover(data,cross1,cross2):
 			data.loc[index,'bsh'] = 'hold'
 
 	return data
+
+def maxmin(data,graph,period):
+	state = 'hold'
+	for index,row in data.iterrows():
+		if index <= period:
+			continue
+		else:
+			if (data.loc[index,graph]-data.loc[index-period,graph])/period > 0 and state != 'buy':
+				data.loc[index,'bsh'] = 'buy'
+				state = 'buy'
+			elif (data.loc[index,graph]-data.loc[index-period,graph])/period < 0 and state != 'sell':
+				data.loc[index,'bsh'] = 'sell'
+				state = 'sell'
+			else:
+				data.loc[index,'bsh'] = 'hold'
+
+	return data

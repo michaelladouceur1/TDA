@@ -13,7 +13,7 @@ cerebro.broker.set_cash(c_init)
 
 print(f'Starting Portfolio Value: ${cerebro.broker.getvalue()}')
 
-res1 = get_recent_data('SPY','year',5,'daily',1)
+res1 = get_recent_data('MSFT','day',5,'minute',1)
 res1 = timestamp_to_iso(res1)
 res2 = get_recent_data('FNV','year',1,'daily',1)
 res2 = timestamp_to_iso(res2)
@@ -26,7 +26,8 @@ cerebro.adddata(data1,name='data1')
 # cerebro.adddata(data2,name='data2')
 
 # cerebro.addstrategy(BuyAndHold)
-cerebro.addstrategy(OverUnder)
+# cerebro.addstrategy(OverUnder)
+cerebro.addstrategy(OverUnderShort)
 
 # cerebro.addsizer(bt.sizers.FixedSize)
 
