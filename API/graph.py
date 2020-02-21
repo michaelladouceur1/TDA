@@ -30,7 +30,7 @@ def candle(data,*args,bsh=False):
             if i[1] == 'buy':
                 fig.add_annotation(
                     x=data.loc[i[0],'datetime'],
-                    y=data.loc[i[0],'open']+4,
+                    y=data.loc[i[0],'open'],
                     xref='x',
                     yref='y',
                     ax=0,
@@ -46,7 +46,7 @@ def candle(data,*args,bsh=False):
             elif i[1] == 'sell':
                 fig.add_annotation(
                     x=data.loc[i[0],'datetime'],
-                    y=data.loc[i[0],'open']-4,
+                    y=data.loc[i[0],'open'],
                     xref='x',
                     yref='y',
                     ax=0,

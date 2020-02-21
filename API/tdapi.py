@@ -87,17 +87,26 @@ def get_movers(index,direction,change):
 
     return res
 
-period1 = 50
-period2 = 100
+period1 = 10
+period2 = 30
+period3 = 100
 
-data = get_recent_data('GOOG','day',1,'minute',1)
+symbol = 'QQQ'
+period_type = 'day'
+period = 1
+freq_type = 'minute'
+freq = 1
+
+data = get_recent_data(symbol,period_type,period,freq_type,freq)
 data = timestamp_to_iso(data)
 # print(data)
-data = sma(data,period2,'close')
 data = sma(data,period1,'close')
+data = sma(data,period2,'close')
+data = sma(data,period3,'close')
+crossoverdiff(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
 # data = crossover(data,f'sma_{period1}',f'sma_{period2}')
-data = maxmin(data,f'sma_{period1}',20)
-with pd.option_context('display.max_rows', None):
-    print(data)
+# data = maxmin(data,f'sma_{period1}',20)
+# with pd.option_context('display.max_rows', None):
+#     print(data)
 print(f'{sys.getsizeof(data)/1000} KB')
-candle(data,f'sma_{period1}',f'sma_{period2}',bsh=True)
+candle(data,f'sma_{period3}',f'sma_{period2}',f'sma_{period1}',bsh=True)

@@ -25,6 +25,30 @@ def crossover(data,cross1,cross2):
 
 	return data
 
+def crossoverdiff(data,graphs):
+	prev_state = ''
+	for i,row in data.iterrows():
+		state = []
+		for j,graph in enumerate(graphs[:-1]):
+			if data.loc[i,graph] >= data.loc[i,graphs[j+1:]].any():
+				state.append('sell')
+			elif data.loc[i,graph] <= data.loc[i,graphs[j+1:]].any():
+				state.append('buy')
+			else:
+				state.append('hold')
+
+		if all(elem == 'buy' for elem in state) and prev_state != 'buy':
+			data.loc[i,'bsh'] = 'buy'
+			prev_state = 'buy'
+		elif all(elem == 'sell' for elem in state) and prev_state != 'sell':
+			data.loc[i,'bsh'] = 'sell'
+			prev_state = 'sell'
+		else:
+			data.loc[i,'bsh'] = 'hold'
+		
+
+	return data
+
 def maxmin(data,graph,period):
 	state = 'hold'
 	for index,row in data.iterrows():
