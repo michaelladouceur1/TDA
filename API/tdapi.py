@@ -7,25 +7,43 @@ from datetime import datetime
 import pprint
 import sys 
 
-pp = pprint.PrettyPrinter(indent=4)
+DATA_PATH = '../Data/'
 
-def get_recent_data(symbol,periodType,period,frequencyType,frequency,needExtendedHoursData='false'):
-    ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
-    data = {
-        'apikey': API_KEY,
-        'periodType': periodType,
-        'period': period,
-        'frequencyType': frequencyType,
-        'frequency': frequency
-    }
-    print(data)
+def get_recent_data(symbol,periodType,period,frequencyType,frequency,needExtendedHoursData='false',local=False):
+    if local == True:
+        try:
+            res = search_local_data(symbol,periodType,period,frequencyType,frequency)
+            if res == None:
+                raise Error
 
-    res = requests.get(ph_url,params=data)
-    print(res)
-    res = json.loads(res.content)['candles']
-    res = convert_to_df(res)
+        except:
+            ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
+            data = {
+                'apikey': API_KEY,
+                'periodType': periodType,
+                'period': period,
+                'frequencyType': frequencyType,
+                'frequency': frequency
+            }
 
-    return res
+            res = requests.get(ph_url,params=data) 
+            res = json.loads(res.content)['candles']
+            res = convert_to_df(res)
+
+        return res
+
+
+def log_error(error,msg):
+    print(msg)
+    print(error)
+
+def search_local_data(symbol,periodType,period,frequencyType,frequency):
+    filename = f'{symbol}-{periodType}-{period}-{frequencyType}-{frequency}.csv'
+    try:
+        data = pd.read_csv(DATA_PATH+filename)
+        return data
+    except:
+        return 
 
 def get_period_data(symbol,frequencyType,frequency,startDate,endDate,needExtendedHoursData='false'):
     ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
@@ -93,17 +111,18 @@ period3 = 100
 
 symbol = 'QQQ'
 period_type = 'day'
-period = 1
+period = 2
 freq_type = 'minute'
 freq = 1
 
-data = get_recent_data(symbol,period_type,period,freq_type,freq)
+data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
+print(data)
 data = timestamp_to_iso(data)
 # print(data)
 data = sma(data,period1,'close')
 data = sma(data,period2,'close')
 data = sma(data,period3,'close')
-crossoverdiff(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
+crossover(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
 # data = crossover(data,f'sma_{period1}',f'sma_{period2}')
 # data = maxmin(data,f'sma_{period1}',20)
 # with pd.option_context('display.max_rows', None):
