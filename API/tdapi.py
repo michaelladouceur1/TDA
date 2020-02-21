@@ -2,65 +2,93 @@ from config import *
 from utils import *
 from graph import *
 import requests
+from requests.exceptions import HTTPError
 import json
 from datetime import datetime
 import pprint
 import sys 
 
-DATA_PATH = '../Data/'
+if sys.platform == 'linux' or sys.platform == 'linux2':
+	DATA_PATH = '../Data/'
+elif sys.platform == 'win32':
+	DATA_PATH = '..\\Data\\'
 
 def get_recent_data(symbol,periodType,period,frequencyType,frequency,needExtendedHoursData='false',local=False):
-    if local == True:
-        try:
-            res = search_local_data(symbol,periodType,period,frequencyType,frequency)
-            if res == None:
-                raise Error
+    print('Connecting to API')
+    res = get_price_history(
+    	symbol,
+    	periodType=periodType,
+    	period=period,
+    	frequencyType=frequencyType,
+    	frequency=frequency,
+    	needExtendedHoursData=needExtendedHoursData)
 
-        except:
-            ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
-            data = {
-                'apikey': API_KEY,
-                'periodType': periodType,
-                'period': period,
-                'frequencyType': frequencyType,
-                'frequency': frequency
-            }
+    return res
 
-            res = requests.get(ph_url,params=data) 
-            res = json.loads(res.content)['candles']
-            res = convert_to_df(res)
+def get_period_data(symbol,frequencyType,frequency,startDate,endDate,needExtendedHoursData='false'):
+	print('Connecting to API')
+	res = get_price_history(
+        	symbol,
+        	startDate=startDate,
+        	endDate=endDate,
+        	frequencyType=frequencyType,
+        	frequency=frequency,
+        	needExtendedHoursData=needExtendedHoursData)
 
-        return res
+	return res
 
 
 def log_error(error,msg):
     print(msg)
     print(error)
 
-def search_local_data(symbol,periodType,period,frequencyType,frequency):
-    filename = f'{symbol}-{periodType}-{period}-{frequencyType}-{frequency}.csv'
-    try:
-        data = pd.read_csv(DATA_PATH+filename)
-        return data
-    except:
-        return 
+def search_local_data(type,symbol,periodType=None,period=None,startDate=None,endDate=None,frequencyType=None,frequency=None):
+	filename = get_filename(type=type,symbol=symbol,periodType=periodType,period=period,startDate=startDate,
+							endDate=endDate,frequencyType=frequencyType,frequency=frequency)
+	try:
+	    print(f'Local Search: {filename}')
+	    data = pd.read_csv(filename)
+	    return data
+	except:
+	    return 
 
-def get_period_data(symbol,frequencyType,frequency,startDate,endDate,needExtendedHoursData='false'):
-    ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
-    data = {
-        'apikey': API_KEY,
-        'frequencyType': frequencyType,
-        'frequency': frequency,
-        'startDate': startDate,
-        'endDate': endDate,
-        'needExtendedHoursData': needExtendedHoursData
-    }
+def save_local_data(data,type,symbol,periodType=None,period=None,startDate=None,endDate=None,frequencyType=None,frequency=None):
+	filename = get_filename(type=type,symbol=symbol,periodType=periodType,period=period,startDate=startDate,
+							endDate=endDate,frequencyType=frequencyType,frequency=frequency)
+	try:
+	    print(f'Local Save: {filename}')
+	    data.to_csv(filename)
+	except Error as err:
+	    log_error(err,'Data could not be saved locally.') 
 
-    res = requests.get(ph_url,params=data)
-    res = json.loads(res.content)['candles']
-    res = convert_to_df(res)
+def get_filename(type,symbol,periodType=None,period=None,startDate=None,endDate=None,frequencyType=None,frequency=None):
+	if type == 'recent':
+		return f'{DATA_PATH}{symbol}-{periodType}-{period}-{frequencyType}-{frequency}-R.csv'
+	elif type == 'period':
+		return f'{DATA_PATH}{symbol}-{startDate}-{endDate}-{frequencyType}-{frequency}-P.csv'
 
-    return res
+def get_price_history(symbol,periodType=None,period=None,frequencyType=None,frequency=None,startDate=None,endDate=None,needExtendedHoursData='false'):
+	ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
+	data = {
+	    'apikey': API_KEY,
+	    'periodType': periodType,
+	    'period': period,
+	    'frequencyType': frequencyType,
+	    'frequency': frequency,
+	    'startDate': startDate,
+	    'endDate': endDate,
+	    'needExtendedHoursData': needExtendedHoursData
+	}
+
+	try:
+		res = requests.get(ph_url,params=data) 
+		res.raise_for_status()
+	except HTTPError as http_error:
+		log_error(http_error,'HTTP Error')
+	else:
+		res = json.loads(res.content)['candles']
+		res = convert_to_df(res)
+		return res
 
 def get_instruments(symbol,projection='fundamental'):
     ins_url = 'https://api.tdameritrade.com/v1/instruments'
@@ -115,17 +143,17 @@ period = 2
 freq_type = 'minute'
 freq = 1
 
-data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
+# data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
+# data = timestamp_to_iso(data)
+# data = sma(data,period1,'close')
+# data = sma(data,period2,'close')
+# data = sma(data,period3,'close')
+# crossover(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
+# # with pd.option_context('display.max_rows', None):
+# #     print(data)
+# save_local_data(data,type='recent',symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
+# print(f'{sys.getsizeof(data)/1000} KB')
+# candle(data,f'sma_{period3}',f'sma_{period2}',f'sma_{period1}',bsh=True)
+
+data = get_price_history(symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
 print(data)
-data = timestamp_to_iso(data)
-# print(data)
-data = sma(data,period1,'close')
-data = sma(data,period2,'close')
-data = sma(data,period3,'close')
-crossover(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
-# data = crossover(data,f'sma_{period1}',f'sma_{period2}')
-# data = maxmin(data,f'sma_{period1}',20)
-# with pd.option_context('display.max_rows', None):
-#     print(data)
-print(f'{sys.getsizeof(data)/1000} KB')
-candle(data,f'sma_{period3}',f'sma_{period2}',f'sma_{period1}',bsh=True)
