@@ -4,11 +4,13 @@ def convert_to_df(data,index=None):
 	return pd.DataFrame(data,index=index)
 
 def timestamp_to_iso(data):
-	data['datetime'] = data['datetime'].apply(lambda x: pd.Timestamp(x, unit='ms'))
+	if type(data['datetime'][0]) == 'numpy.int64':
+		data['datetime'] = data['datetime'].apply(lambda x: pd.Timestamp(x, unit='ms'))
 	return data
 
 def sma(data,window,param,win_type=None):
-	data[f'sma_{window}'] = data[param].rolling(window,win_type).mean()
+	if data.columns.any() != f'sma_{window}':
+		data[f'sma_{window}'] = data[param].rolling(window,win_type).mean()
 	return data
 
 def crossover(data,graphs):
