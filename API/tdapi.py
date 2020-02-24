@@ -1,6 +1,8 @@
 from config import *
 from utils import *
 from graph import *
+import pandas as pd
+import numpy as np
 import requests
 from requests.exceptions import HTTPError
 import json
@@ -170,13 +172,22 @@ freq = 1
 
 data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
 data = timestamp_to_iso(data)
-data = sma(data,period1,'close')
-print(data)
+sma1 = sma(data,period1,'close')
+sma2 = sma(data,period2,'close')
+sell = data['datetime'][sma1 < sma2]
+for i,ind in enumerate(sell.index):
+	if sell.index[i+1] == sell.index[i] + 1:
+		print(ind)
+buy = data['datetime'][sma1 > sma2]
+print_all(sell)
+# print_all(buy)
+# print(sma)
+# print(data)
+# print(data)
 # data = sma(data,period2,'close')
 # data = sma(data,period3,'close')
 # crossover(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
-# # with pd.option_context('display.max_rows', None):
-# #     print(data)
+
 # save_local_data(data,type='recent',symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
 # print(f'{sys.getsizeof(data)/1000} KB')
 # candle(data,f'sma_{period3}',f'sma_{period2}',f'sma_{period1}',bsh=True)
