@@ -1,6 +1,6 @@
 from tdapi import get_recent_data
 from utils import timestamp_to_iso
-from strategy import Strategy
+# from strategy import Strategy
 from graph import candle
 
 class Trader():
@@ -28,9 +28,9 @@ class Trader():
 		self.value -= amount
 
 
-data = get_recent_data('QQQ','month',6,'daily',1)
-data = timestamp_to_iso(data)
+# data = get_recent_data('QQQ','month',6,'daily',1)
+# data = timestamp_to_iso(data)
 
-trade = Trader(data,100000)
-trade.add_strategy(Strategy(data))
-print(data)
+# trade = Trader(data,100000)
+# trade.add_strategy(Strategy(data))
+# print(data)

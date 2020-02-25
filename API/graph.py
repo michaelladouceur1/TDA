@@ -29,8 +29,8 @@ def candle(data,*args,buy=None,sell=None):
     if buy is not None:
         for i in enumerate(buy):
             fig.add_annotation(
-                x=i,
-                y=data.loc[i[0],'open'],
+                x=i[1],
+                y=data.loc[i[0],'open']-1,
                 xref='x',
                 yref='y',
                 ax=0,
@@ -45,10 +45,9 @@ def candle(data,*args,buy=None,sell=None):
             )
     if sell is not None:
         for i in enumerate(sell):
-            print(i)
             fig.add_annotation(
                 x=i[1],
-                y=250,
+                y=data.loc[i[0],'open'],
                 xref='x',
                 yref='y',
                 ax=0,

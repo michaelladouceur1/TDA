@@ -16,7 +16,7 @@ elif sys.platform == 'win32':
 	DATA_PATH = '..\\Data\\'
 
 
-def get_recent_data(symbol, periodType, period, frequencyType, frequency, needExtendedHoursData='false', local=False):
+def get_recent_data(symbol, periodType, period, frequencyType, frequency, needExtendedHoursData='true', local=False):
 	if local == True:
 		data = search_local_data('recent', symbol, periodType,
 								 period, frequencyType=frequencyType, frequency=frequency)
@@ -46,7 +46,7 @@ def get_recent_data(symbol, periodType, period, frequencyType, frequency, needEx
 		return res
 
 
-def get_period_data(symbol, frequencyType, frequency, startDate, endDate, needExtendedHoursData='false'):
+def get_period_data(symbol, frequencyType, frequency, startDate, endDate, needExtendedHoursData='true'):
 	print('Connecting to API')
 	res = get_price_history(
 			symbol,
@@ -161,51 +161,50 @@ def get_movers(index,direction,change):
 	return res
 
 period1 = 10
-period2 = 30
-period3 = 100
+period2 = 50
+period3 = 150
 
 symbol = 'QQQ'
 period_type = 'day'
-period = 1
+period = 2
 freq_type = 'minute'
 freq = 1
 
-def buy(dat,expression):
-	return dat['datetime'][expression]
+# def buy(dat,*args):
+# 	return dat['datetime'][arg for arg in args]
 
-data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
-data = timestamp_to_iso(data)
-sma1 = sma(data,period1,'close')
-sma2 = sma(data,period2,'close')
-# sell = data['datetime'][sma1 < sma2]
-sell = buy(data,sma1<sma2)
-buy = data['datetime'][sma1 > sma2]
-hold = []
-for i,s in enumerate(sell.index[:-1]):
-	# print(sell.index[i+1]-sell.index[i])
-	# print(sell[s])
-	if i == 0:
-		continue
-	else:
-		if sell.index[i+1]-sell.index[i] != 1:
-			hold.append(sell.index[i+1])
+# data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
+# data = timestamp_to_iso(data)
+# sma1 = sma(data,period1,'close')
+# sma2 = sma(data,period2,'close')
+# sma3 = sma(data,period3,'close')
+# # sell = data['datetime'][sma1 < sma2]
+# # sell = buy(data,sma1<sma2,sma2<sma3)
+# sell = data['datetime'][(sma1<sma2) & (sma2<sma3) & (sma1<sma3)]
+# buy = data['datetime'][(sma1>sma2) & (sma2>sma3) & (sma1>sma3)]
+# def reduce_bs(data):
+# 	hold = []
+# 	for i,s in enumerate(data.index[:-1]):
+# 		# print(sell.index[i+1]-sell.index[i])
+# 		# print(sell[s])
+# 		if i == 0:
+# 			continue
+# 		else:
+# 			if data.index[i+1]-data.index[i] != 1:
+# 				hold.append(data.index[i+1])
+# 	return data[hold]
 		
-# print_all(sell)
-print(hold)
-sell = sell[hold]
-print(sell)
-# print_all(buy)
-# print(sma)
-# print(data)
-# print(data)
-# data = sma(data,period2,'close')
-# data = sma(data,period3,'close')
-# crossover(data,[f'sma_{period3}',f'sma_{period2}',f'sma_{period1}'])
+
+# buy = reduce_bs(buy)
+# sell = reduce_bs(sell)
+# print(buy)
+# print(sell)
+
 
 # save_local_data(data,type='recent',symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
 # print(f'{sys.getsizeof(data)/1000} KB')
-candle(data,sma1,sma2,sell=sell)
-# print(sma1)
+
+# candle(data,sma1,sma2,sma3,sell=sell,buy=buy)
 
 # data = get_price_history(symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
 # print(data)
