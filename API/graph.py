@@ -1,7 +1,7 @@
 import plotly.graph_objects as go 
 import pandas as pd 
 
-def candle(data,*args,bsh=False):
+def candle(data,*args,buy=None,sell=None):
     fig = go.Figure()
 
     fig.add_trace(
@@ -11,13 +11,14 @@ def candle(data,*args,bsh=False):
                         low=data['low'],
                         close=data['close'],
                         name='Candlestick'))
-    
+    i = 0
     for arg in args:
+        i+=1
         fig.add_trace(
             go.Scatter(
                 x=data['datetime'],
-                y=data[arg],
-                name=arg,
+                y=arg,
+                name=i,
                 line=dict(
                     color='#50e680',
                     width=1
@@ -25,40 +26,41 @@ def candle(data,*args,bsh=False):
             )
         )
 
-    if bsh == True:
-        for i in enumerate(data['bsh']):
-            if i[1] == 'buy':
-                fig.add_annotation(
-                    x=data.loc[i[0],'datetime'],
-                    y=data.loc[i[0],'open'],
-                    xref='x',
-                    yref='y',
-                    ax=0,
-                    ay=-10,
-                    text=None,
-                    showarrow=True,
-                    arrowhead=1,
-                    arrowsize=4,
-                    arrowwidth=1,
-                    arrowcolor='#086309',
-                    opacity=1
-                )
-            elif i[1] == 'sell':
-                fig.add_annotation(
-                    x=data.loc[i[0],'datetime'],
-                    y=data.loc[i[0],'open'],
-                    xref='x',
-                    yref='y',
-                    ax=0,
-                    ay=10,
-                    text=None,
-                    showarrow=True,
-                    arrowhead=1,
-                    arrowsize=4,
-                    arrowwidth=1,
-                    arrowcolor='#990606',
-                    opacity=1
-                )
+    if buy is not None:
+        for i in enumerate(buy):
+            fig.add_annotation(
+                x=i,
+                y=data.loc[i[0],'open'],
+                xref='x',
+                yref='y',
+                ax=0,
+                ay=-10,
+                text=None,
+                showarrow=True,
+                arrowhead=1,
+                arrowsize=4,
+                arrowwidth=1,
+                arrowcolor='#086309',
+                opacity=1
+            )
+    if sell is not None:
+        for i in enumerate(sell):
+            print(i)
+            fig.add_annotation(
+                x=i[1],
+                y=250,
+                xref='x',
+                yref='y',
+                ax=0,
+                ay=10,
+                text=None,
+                showarrow=True,
+                arrowhead=1,
+                arrowsize=4,
+                arrowwidth=1,
+                arrowcolor='#990606',
+                opacity=1
+            )
 
     fig.update_layout(
         template='plotly_dark',

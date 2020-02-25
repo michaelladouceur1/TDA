@@ -166,20 +166,34 @@ period3 = 100
 
 symbol = 'QQQ'
 period_type = 'day'
-period = 2
+period = 1
 freq_type = 'minute'
 freq = 1
+
+def buy(dat,expression):
+	return dat['datetime'][expression]
 
 data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
 data = timestamp_to_iso(data)
 sma1 = sma(data,period1,'close')
 sma2 = sma(data,period2,'close')
-sell = data['datetime'][sma1 < sma2]
-for i,ind in enumerate(sell.index):
-	if sell.index[i+1] == sell.index[i] + 1:
-		print(ind)
+# sell = data['datetime'][sma1 < sma2]
+sell = buy(data,sma1<sma2)
 buy = data['datetime'][sma1 > sma2]
-print_all(sell)
+hold = []
+for i,s in enumerate(sell.index[:-1]):
+	# print(sell.index[i+1]-sell.index[i])
+	# print(sell[s])
+	if i == 0:
+		continue
+	else:
+		if sell.index[i+1]-sell.index[i] != 1:
+			hold.append(sell.index[i+1])
+		
+# print_all(sell)
+print(hold)
+sell = sell[hold]
+print(sell)
 # print_all(buy)
 # print(sma)
 # print(data)
@@ -190,7 +204,8 @@ print_all(sell)
 
 # save_local_data(data,type='recent',symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
 # print(f'{sys.getsizeof(data)/1000} KB')
-# candle(data,f'sma_{period3}',f'sma_{period2}',f'sma_{period1}',bsh=True)
+candle(data,sma1,sma2,sell=sell)
+# print(sma1)
 
 # data = get_price_history(symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
 # print(data)
