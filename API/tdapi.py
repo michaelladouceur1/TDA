@@ -1,99 +1,21 @@
 from config import *
-from utils import *
-from graph import *
-import pandas as pd
-import numpy as np
+from utils import convert_to_df
 import requests
-from requests.exceptions import HTTPError
 import json
-from datetime import datetime
-import pprint
-import sys
 
-if sys.platform == 'linux' or sys.platform == 'linux2':
-	DATA_PATH = '../Data/'
-elif sys.platform == 'win32':
-	DATA_PATH = '..\\Data\\'
+BASE = 'https://api.tdameritrade.com/v1/'
 
-
-def get_recent_data(symbol, periodType, period, frequencyType, frequency, needExtendedHoursData='true', local=False):
-	if local == True:
-		data = search_local_data('recent', symbol, periodType,
-								 period, frequencyType=frequencyType, frequency=frequency)
-		if data is not None:
-			print('Local Data Found')
-			return data
-		else:
-			res = get_price_history(
-					symbol,
-					periodType=periodType,
-					period=period,
-					frequencyType=frequencyType,
-					frequency=frequency,
-					needExtendedHoursData=needExtendedHoursData)
-
-			return res
-
-	else:
-		res = get_price_history(
-					symbol,
-					periodType=periodType,
-					period=period,
-					frequencyType=frequencyType,
-					frequency=frequency,
-					needExtendedHoursData=needExtendedHoursData)
-
-		return res
-
-
-def get_period_data(symbol, frequencyType, frequency, startDate, endDate, needExtendedHoursData='true'):
-	print('Connecting to API')
-	res = get_price_history(
-			symbol,
-			startDate=startDate,
-			endDate=endDate,
-			frequencyType=frequencyType,
-			frequency=frequency,
-			needExtendedHoursData=needExtendedHoursData)
-
-	return res
-
-
-def log_error(error, msg):
-	print(msg)
-	print(error)
-
-
-def search_local_data(type, symbol, periodType=None, period=None, startDate=None, endDate=None, frequencyType=None, frequency=None):
-	filename = get_filename(type=type, symbol=symbol, periodType=periodType, period=period, startDate=startDate,
-							endDate=endDate, frequencyType=frequencyType, frequency=frequency)
-	try:
-		print(f'Local Search: {filename}')
-		data = pd.read_csv(filename)
-		return data
-	except:
-		return
-
-
-def save_local_data(data, type, symbol, periodType=None, period=None, startDate=None, endDate=None, frequencyType=None, frequency=None):
-	filename = get_filename(type=type, symbol=symbol, periodType=periodType, period=period, startDate=startDate,
-							endDate=endDate, frequencyType=frequencyType, frequency=frequency)
-	try:
-		print(f'Local Save: {filename}')
-		data.to_csv(filename)
-	except Error as err:
-		log_error(err, 'Data could not be saved locally.')
-
-
-def get_filename(type, symbol, periodType=None, period=None, startDate=None, endDate=None, frequencyType=None, frequency=None):
-	if type == 'recent':
-		return f'{DATA_PATH}{symbol}-{periodType}-{period}-{frequencyType}-{frequency}-R.csv'
-	elif type == 'period':
-		return f'{DATA_PATH}{symbol}-{startDate}-{endDate}-{frequencyType}-{frequency}-P.csv'
-
-
-def get_price_history(symbol, periodType=None, period=None, frequencyType=None, frequency=None, startDate=None, endDate=None, needExtendedHoursData='false'):
-	ph_url = f'https://api.tdameritrade.com/v1/marketdata/{symbol}/pricehistory'
+def get_price_history(
+	symbol, 
+	periodType=None, 
+	period=None, 
+	frequencyType=None, 
+	frequency=None, 
+	startDate=None, 
+	endDate=None, 
+	needExtendedHoursData='false'
+	):
+	ph_url = f'{BASE}marketdata/{symbol}/pricehistory'
 	data = {
 		'apikey': API_KEY,
 		'periodType': periodType,
@@ -104,21 +26,14 @@ def get_price_history(symbol, periodType=None, period=None, frequencyType=None, 
 		'endDate': endDate,
 		'needExtendedHoursData': needExtendedHoursData
 	}
-	
-	try:
-		print('Connecting to API')
-		res = requests.get(ph_url,params=data) 
-		res.raise_for_status()
-	except HTTPError as http_error:
-		log_error(http_error,'HTTP Error')
-	else:
-		print('Data Received')
-		res = json.loads(res.content)['candles']
-		res = convert_to_df(res)
-		return res
+
+	res = requests.get(ph_url,params=data) 
+	res = json.loads(res.content)['candles']
+	res = convert_to_df(res)
+	return res
 
 def get_instruments(symbol,projection='fundamental'):
-	ins_url = 'https://api.tdameritrade.com/v1/instruments'
+	ins_url = f'{BASE}instruments'
 	data = {
 		'apikey': API_KEY,
 		'symbol': symbol,
@@ -133,13 +48,13 @@ def get_instruments(symbol,projection='fundamental'):
 	return res
 
 def get_account_data(fields=''):
-	acc_url = f'https://api.tdameritrade.com/v1/accounts/{ACCOUNT_ID}'
+	acc_url = f'{BASE}accounts/{ACCOUNT_ID}'
 	data = {
 		'apikey': API_KEY,
 		'fields': fields
 	}
 	headers = {
-		'Bearer': ACCESS_TOKEN
+		'Authorization': f'Bearer {ACCESS_TOKEN}' 
 		# 'Authorization': REFRESH_TOKEN
 	}
 
@@ -148,7 +63,7 @@ def get_account_data(fields=''):
 	return res.content
 
 def get_movers(index,direction,change):
-	mov_url = f'https://api.tdameritrade.com/v1/marketdata/${index}/movers'
+	mov_url = f'{BASE}marketdata/${index}/movers'
 	data = {
 		'apikey': API_KEY,
 		'direction': direction,
@@ -159,52 +74,3 @@ def get_movers(index,direction,change):
 	res = json.loads(res.content)
 
 	return res
-
-period1 = 10
-period2 = 50
-period3 = 150
-
-symbol = 'QQQ'
-period_type = 'day'
-period = 2
-freq_type = 'minute'
-freq = 1
-
-# def buy(dat,*args):
-# 	return dat['datetime'][arg for arg in args]
-
-# data = get_recent_data(symbol,period_type,period,freq_type,freq,local=True)
-# data = timestamp_to_iso(data)
-# sma1 = sma(data,period1,'close')
-# sma2 = sma(data,period2,'close')
-# sma3 = sma(data,period3,'close')
-# # sell = data['datetime'][sma1 < sma2]
-# # sell = buy(data,sma1<sma2,sma2<sma3)
-# sell = data['datetime'][(sma1<sma2) & (sma2<sma3) & (sma1<sma3)]
-# buy = data['datetime'][(sma1>sma2) & (sma2>sma3) & (sma1>sma3)]
-# def reduce_bs(data):
-# 	hold = []
-# 	for i,s in enumerate(data.index[:-1]):
-# 		# print(sell.index[i+1]-sell.index[i])
-# 		# print(sell[s])
-# 		if i == 0:
-# 			continue
-# 		else:
-# 			if data.index[i+1]-data.index[i] != 1:
-# 				hold.append(data.index[i+1])
-# 	return data[hold]
-		
-
-# buy = reduce_bs(buy)
-# sell = reduce_bs(sell)
-# print(buy)
-# print(sell)
-
-
-# save_local_data(data,type='recent',symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
-# print(f'{sys.getsizeof(data)/1000} KB')
-
-# candle(data,sma1,sma2,sma3,sell=sell,buy=buy)
-
-# data = get_price_history(symbol=symbol,periodType=period_type,period=period,frequencyType=freq_type,frequency=freq)
-# print(data)
