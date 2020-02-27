@@ -11,4 +11,5 @@ class Strategy():
 		self.sma3 = sma(data,period3,'close')
 		trade = Trader(self.data,100000)
 
-Strategy()
+	def strategy(self):
+		if self.sma1 

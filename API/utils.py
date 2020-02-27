@@ -4,10 +4,13 @@ import numpy as np
 def convert_to_df(data,index=None):
 	return pd.DataFrame(data,index=index)
 
-def timestamp_to_iso(data):
-	if type(data['datetime'][0]) == np.int64:
-		data['datetime'] = data['datetime'].apply(lambda x: pd.Timestamp(x, unit='ms'))
-	return data
+def timestamp_to_iso(func):
+	def wrapper(*args,**kwargs):
+		data = func(*args,**kwargs)
+		if isinstance(data['datetime'][0], np.int64):
+			data['datetime'] = data['datetime'].apply(lambda x: pd.Timestamp(x, unit='ms'))
+		return data
+	return wrapper
 
 def print_all(data):
 	with pd.option_context('display.max_rows', None):

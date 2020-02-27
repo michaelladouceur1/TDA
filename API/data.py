@@ -7,6 +7,7 @@ if sys.platform == 'linux' or sys.platform == 'linux2':
 elif sys.platform == 'win32':
 	DATA_PATH = '..\\Data\\'
 
+@timestamp_to_iso
 def get_recent_data(
 	symbol, 
 	periodType, 
