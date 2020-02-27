@@ -26,6 +26,8 @@ def sma(data,window,param=None,win_type=None):
 
 def crossover(data,graphs):
 	prev_state = ''
+	buy = pd.Series()
+	sell = pd.Series()
 	for i,row in data.iterrows():
 		state = []
 		for j,graph in enumerate(graphs[:-1]):
@@ -38,12 +40,15 @@ def crossover(data,graphs):
 
 		if all(elem == 'buy' for elem in state) and prev_state != 'buy':
 			data.loc[i,'bsh'] = 'buy'
+			# buy.append(data.loc[i,'datetime'])
 			prev_state = 'buy'
 		elif all(elem == 'sell' for elem in state) and prev_state != 'sell':
 			data.loc[i,'bsh'] = 'sell'
+			# sell.append(data.loc[i,'datetime'])
 			prev_state = 'sell'
 		else:
-			data.loc[i,'bsh'] = 'hold'
+			# data.loc[i,'bsh'] = 'hold'
+			continue
 		
 
 	return data
