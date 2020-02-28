@@ -1,9 +1,20 @@
-from tdapi import get_recent_data
-from utils import timestamp_to_iso
-# from strategy import Strategy
-from graph import candle
-
 class Trader():
+	def _check_cash(func):
+		def inner(self,*args):
+			if self.ccash > 0:
+				func(self,*args)
+			else:
+				return
+		return inner
+
+	def _check_value(func):
+		def inner(self,*args):
+			if self.value > 0:
+				func(self,*args)
+			else:
+				return
+		return inner
+
 	def __init__(self,data,icash):
 		self.data = data
 		self.icash = icash
@@ -11,26 +22,21 @@ class Trader():
 		self.value = 0
 		print(self.data)
 
-	def run(self):
-		for index,row in self.data.iterrows():
-			print(row['close'])
-
 	def add_strategy(self,strategy):
 		self.strategy = strategy
-		print(self.strategy.response)
+		print(self.strategy)
 
-	def buy(self,amount):
-		self.ccash -= amount
-		self.value += amount
+	@_check_cash
+	def buy(self,amount=None):
+		if amount is None:
+			self.value = self.ccash
+			self.ccash = 0
+		else:
+			self.ccash -= amount
+			self.value += amount
 
-	def sell(self,amount):
+	@_check_value
+	def sell(self,amount=None):
 		self.ccash += amount
 		self.value -= amount
 
-
-# data = get_recent_data('QQQ','month',6,'daily',1)
-# data = timestamp_to_iso(data)
-
-# trade = Trader(data,100000)
-# trade.add_strategy(Strategy(data))
-# print(data)

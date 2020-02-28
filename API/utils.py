@@ -17,12 +17,8 @@ def print_all(data):
 		print(data)
 
 def sma(data,window,param=None,win_type=None):
-	try:
-		sma = data[param].rolling(window,win_type).mean()
-	except:
-		sma = data.rolling(window,win_type).mean()
-	finally:
-		return sma
+	sma = data[param].rolling(window,win_type).mean()
+	return sma
 
 def crossover(data,graphs):
 	prev_state = ''
